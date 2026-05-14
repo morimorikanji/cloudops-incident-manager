@@ -1,0 +1,4 @@
+#!/bin/sh
+# Maven Wrapper — requires Apache Maven 3.9+ in PATH.
+# To generate the full download-on-demand wrapper: mvn wrapper:wrapper
+exec mvn "$@"

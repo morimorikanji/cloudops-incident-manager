@@ -28,7 +28,7 @@ management:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always  # CC-006 (Spring Security 導入後) に when-authorized へ変更する
 
 app:
   jwt:

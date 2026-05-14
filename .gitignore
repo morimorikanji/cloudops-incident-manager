@@ -34,3 +34,9 @@ Thumbs.db
 # === Logs ===
 *.log
 logs/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# TypeScript build cache
+*.tsbuildinfo
