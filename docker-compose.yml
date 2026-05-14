@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cloudops-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cloudops}
+      POSTGRES_USER: ${POSTGRES_USER:-cloudops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secret}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cloudops}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cloudops-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-cloudops}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-cloudops}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-cloudops_secret}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production-min-32-chars}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-3600000}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cloudops-frontend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://backend:8080/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cloudops-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-pgadmin_secret}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    profiles:
+      - debug
+
+volumes:
+  postgres_data:
