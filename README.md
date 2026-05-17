@@ -178,13 +178,13 @@ ER 図は [docs/ERD.md](docs/ERD.md) を参照。
 ## CI/CD パイプライン
 
 ```
-Push → GitHub Actions
-         ├── Lint & Type Check (frontend)
-         ├── Unit Test (backend)
-         ├── Integration Test (backend + PostgreSQL)
-         ├── Build Docker Images
-         └── [main branch] Deploy to AWS ECS
+Push / Pull Request → GitHub Actions CI
+                       ├── Backend: ./mvnw test, ./mvnw package
+                       └── Frontend: npm ci, type-check, lint, test, build
 ```
+
+CI は Java 21 と Node.js 20 をセットアップし、依存関係をキャッシュしてからバックエンドとフロントエンドを検証します。
+バックエンドジョブでは PostgreSQL 16 のサービスコンテナを起動し、Flyway マイグレーションを含むテストを `test` プロファイルで実行します。
 
 ---
 
