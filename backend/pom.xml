@@ -48,6 +48,29 @@
       <version>${springdoc.version}</version>
     </dependency>
 
+    <!-- JPA -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- PostgreSQL -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Flyway -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
+
     <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -62,11 +85,34 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- H2 (context load tests without Docker) -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Testcontainers (integration tests with Docker) -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <!--
-      以下は今後のフェーズで追加:
-      CC-004: spring-boot-starter-data-jpa, postgresql, flyway-core, flyway-database-postgresql
-      CC-006: spring-boot-starter-security, spring-security-test
-              jjwt-api, jjwt-impl, jjwt-jackson
+      CC-006 で追加予定:
+      spring-boot-starter-security, spring-security-test
+      jjwt-api, jjwt-impl, jjwt-jackson
     -->
   </dependencies>
 
