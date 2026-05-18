@@ -25,6 +25,44 @@ export interface LoginResponse {
 export type ServiceStatus = 'OPERATIONAL' | 'DEGRADED' | 'DOWN' | 'MAINTENANCE';
 export type ServiceTier = 'TIER1' | 'TIER2' | 'TIER3';
 
+export interface TeamInfo {
+  id: string;
+  name: string;
+}
+
+export interface ServiceResponse {
+  id: string;
+  name: string;
+  description?: string | null;
+  team?: TeamInfo | null;
+  tier: ServiceTier;
+  status: ServiceStatus;
+  endpointUrl?: string | null;
+  repositoryUrl?: string | null;
+  openIncidentCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceRequest {
+  name: string;
+  description?: string;
+  teamId?: string;
+  tier: ServiceTier;
+  endpointUrl?: string;
+  repositoryUrl?: string;
+}
+
+export interface UpdateServiceRequest {
+  name?: string;
+  description?: string;
+  teamId?: string;
+  tier?: ServiceTier;
+  status?: ServiceStatus;
+  endpointUrl?: string;
+  repositoryUrl?: string;
+}
+
 export type IncidentSeverity = 'P1' | 'P2' | 'P3' | 'P4';
 export type IncidentStatus = 'OPEN' | 'INVESTIGATING' | 'MITIGATED' | 'RESOLVED' | 'CLOSED';
 
@@ -35,6 +73,7 @@ export interface PageResponse<T> {
   content: T[];
   totalElements: number;
   totalPages: number;
-  page: number;
+  page?: number;
+  number?: number;
   size: number;
 }
