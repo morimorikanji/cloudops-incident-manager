@@ -154,16 +154,22 @@ curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/v1/incid
 
 ## サービス台帳 (Services)
 
+> CDX-003 で実装済み。`ServiceController` → `ServiceService` → `ServiceRepository`
+
 ### GET /services
-サービス一覧取得。
+サービス一覧取得。認証が必要（全ロール閲覧可）。
+
+**実装クラス**: `ServiceController#getServices`
 
 **Query Parameters**
 
 | パラメータ | 型 | 説明 |
 |-----------|-----|------|
-| `status` | string | `OPERATIONAL` / `DEGRADED` / `DOWN` / `MAINTENANCE` |
-| `tier` | string | `TIER1` / `TIER2` / `TIER3` |
+| `status` | string | `OPERATIONAL` / `DEGRADED` / `DOWN` / `MAINTENANCE` でフィルタ |
+| `tier` | string | `TIER1` / `TIER2` / `TIER3` でフィルタ |
 | `teamId` | UUID | チーム ID でフィルタ |
+| `page` | integer | ページ番号（0 始まり、デフォルト: 0） |
+| `size` | integer | 1 ページのサイズ（デフォルト: 20） |
 
 **Response 200**
 ```json
@@ -185,24 +191,45 @@ curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/v1/incid
   ],
   "totalElements": 1,
   "totalPages": 1,
-  "page": 0,
+  "number": 0,
   "size": 20
 }
 ```
 
+**Response 401** — 未認証
+
 ---
 
 ### GET /services/{id}
-サービス詳細取得。
+サービス詳細取得。認証が必要（全ロール閲覧可）。
 
-**Response 200**: 上記 content 配列の 1 要素と同じ構造 + 直近インシデント一覧
+**実装クラス**: `ServiceController#getService`
+
+**Response 200**: 上記 `content` 配列の 1 要素と同じ構造
+
+**Response 404**
+```json
+{ "error": "Not Found", "message": "Service not found: <id>" }
+```
 
 ---
 
 ### POST /services
 サービス登録。必要ロール: `ADMIN` / `OPERATOR`
 
+**実装クラス**: `ServiceController#createService`
+
 **Request Body**
+
+| フィールド | 型 | 必須 | バリデーション |
+|-----------|-----|------|--------------|
+| `name` | string | ✓ | 空文字不可・最大 100 文字・一意 |
+| `description` | string | - | テキスト |
+| `teamId` | UUID | - | 存在するチーム ID |
+| `tier` | string | ✓ | `TIER1` / `TIER2` / `TIER3` |
+| `endpointUrl` | string | - | 最大 500 文字 |
+| `repositoryUrl` | string | - | 最大 500 文字 |
+
 ```json
 {
   "name": "Inventory Service",
@@ -214,21 +241,49 @@ curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/v1/incid
 }
 ```
 
-**Response 201**: 作成されたサービスオブジェクト
+**Response 201**: 作成されたサービスオブジェクト（`status` は `OPERATIONAL` で初期化）
+
+**Response 400** — バリデーションエラー（`name` 欠落・`tier` 欠落等）
+
+**Response 403** — VIEWER ロールは作成不可
+
+**Response 409** — サービス名が重複
 
 ---
 
-### PUT /services/{id}
-サービス更新。必要ロール: `ADMIN` / `OPERATOR`
+### PATCH /services/{id}
+サービス部分更新。必要ロール: `ADMIN` / `OPERATOR`
+
+**実装クラス**: `ServiceController#updateService`
+
+指定フィールドのみ更新（null フィールドはスキップ）。
+
+**Request Body**（すべて任意）
+
+| フィールド | 型 | バリデーション |
+|-----------|-----|--------------|
+| `name` | string | 最大 100 文字・一意 |
+| `description` | string | テキスト |
+| `teamId` | UUID | 存在するチーム ID |
+| `tier` | string | `TIER1` / `TIER2` / `TIER3` |
+| `status` | string | `OPERATIONAL` / `DEGRADED` / `DOWN` / `MAINTENANCE` |
+| `endpointUrl` | string | 最大 500 文字 |
+| `repositoryUrl` | string | 最大 500 文字 |
+
+```json
+{
+  "status": "DEGRADED",
+  "tier": "TIER1"
+}
+```
 
 **Response 200**: 更新後のサービスオブジェクト
 
----
+**Response 403** — VIEWER ロールは更新不可
 
-### DELETE /services/{id}
-サービス削除（論理削除）。必要ロール: `ADMIN`
+**Response 404** — サービスが存在しない
 
-**Response 204** No Content
+**Response 409** — 変更後の名前が重複
 
 ---
 
