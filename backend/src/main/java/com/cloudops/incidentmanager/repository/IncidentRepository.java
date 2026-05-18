@@ -1,5 +1,6 @@
 package com.cloudops.incidentmanager.repository;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -31,4 +32,6 @@ public interface IncidentRepository extends JpaRepository<Incident, UUID> {
     java.util.Optional<Incident> findByIdWithDetails(@Param("id") UUID id);
 
     long countByStatus(IncidentStatus status);
+
+    long countByServiceIdAndStatusNotIn(UUID serviceId, Collection<IncidentStatus> statuses);
 }
