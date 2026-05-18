@@ -2,6 +2,26 @@
 
 export type UserRole = 'ADMIN' | 'OPERATOR' | 'VIEWER';
 
+export interface AuthUser {
+  id?: number | string;
+  email?: string;
+  name?: string;
+  role?: UserRole;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user?: AuthUser;
+}
+
 export type ServiceStatus = 'OPERATIONAL' | 'DEGRADED' | 'DOWN' | 'MAINTENANCE';
 export type ServiceTier = 'TIER1' | 'TIER2' | 'TIER3';
 
