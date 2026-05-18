@@ -8,16 +8,25 @@
 
 ## 認証 (Auth)
 
+> CC-006 で実装済み。JWT はデフォルト 1 時間有効。リフレッシュトークンは 7 日有効。
+
 ### POST /auth/login
 ログイン。アクセストークンとリフレッシュトークンを返します。
+
+**実装クラス**: `AuthController` → `AuthService` → `JwtTokenProvider`
 
 **Request Body**
 ```json
 {
   "email": "admin@example.com",
-  "password": "password"
+  "password": "Admin1234!"
 }
 ```
+
+| フィールド | 型 | 必須 | バリデーション |
+|-----------|-----|------|---------------|
+| `email` | string | ✓ | RFC 5322 メール形式 |
+| `password` | string | ✓ | 空文字不可 |
 
 **Response 200**
 ```json
@@ -34,9 +43,24 @@
 }
 ```
 
+**Response 400** — バリデーションエラー（email 形式不正・必須項目欠落）
+
 **Response 401**
 ```json
-{ "error": "Invalid credentials" }
+{ "error": "Unauthorized", "message": "Invalid credentials" }
+```
+
+**開発用テストアカウント** (V2 シードデータ)
+
+| email | password | role |
+|-------|----------|------|
+| `admin@example.com` | `Admin1234!` | ADMIN |
+| `operator@example.com` | `Operator1234!` | OPERATOR |
+| `viewer@example.com` | `Viewer1234!` | VIEWER |
+
+**取得したトークンの使い方**
+```bash
+curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/v1/incidents
 ```
 
 ---
