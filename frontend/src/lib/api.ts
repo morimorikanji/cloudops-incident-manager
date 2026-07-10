@@ -1,5 +1,14 @@
 import { getToken } from '@/lib/auth';
-import type { LoginRequest, LoginResponse } from '@/types/api';
+import type {
+  LoginRequest,
+  LoginResponse,
+  PageResponse,
+  ServiceRequest,
+  ServiceResponse,
+  ServiceStatus,
+  ServiceTier,
+  UpdateServiceRequest,
+} from '@/types/api';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 
@@ -57,6 +66,53 @@ export function login(credentials: LoginRequest): Promise<LoginResponse> {
     method: 'POST',
     auth: false,
     body: JSON.stringify(credentials),
+  });
+}
+
+export interface ServiceFilters {
+  status?: ServiceStatus;
+  tier?: ServiceTier;
+  page?: number;
+  size?: number;
+}
+
+export function getServices(
+  filters: ServiceFilters = {},
+): Promise<PageResponse<ServiceResponse>> {
+  const params = new URLSearchParams();
+
+  if (filters.status) {
+    params.set('status', filters.status);
+  }
+
+  if (filters.tier) {
+    params.set('tier', filters.tier);
+  }
+
+  params.set('page', String(filters.page ?? 0));
+  params.set('size', String(filters.size ?? 20));
+
+  return apiRequest<PageResponse<ServiceResponse>>(`/services?${params.toString()}`);
+}
+
+export function getService(id: string): Promise<ServiceResponse> {
+  return apiRequest<ServiceResponse>(`/services/${id}`);
+}
+
+export function createService(request: ServiceRequest): Promise<ServiceResponse> {
+  return apiRequest<ServiceResponse>('/services', {
+    method: 'POST',
+    body: JSON.stringify(request),
+  });
+}
+
+export function updateService(
+  id: string,
+  request: UpdateServiceRequest,
+): Promise<ServiceResponse> {
+  return apiRequest<ServiceResponse>(`/services/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(request),
   });
 }
 
